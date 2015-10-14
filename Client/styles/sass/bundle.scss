@@ -1,0 +1,28 @@
+﻿html, body {
+    margin: 0;
+    padding: 0;
+}
+
+@import "_mixins.sass";
+
+div#pagehost {
+    padding: 16px;
+}
+
+p{
+	font-size: 14px;
+}
+
+.spacer{
+	height: 5px;
+}
+.spacer.med{
+	height: 10px;
+}
+
+@import 'NavBar.scss';
+@import 'NavBrand.scss';
+@import 'NavLinks.scss';
+@import 'NavToolbar.scss';
+@import 'Dribbble.scss';
+@import '_responsive.scss';

@@ -1,0 +1,33 @@
+﻿._navlinks {
+  height: 100%;
+
+  > ul {
+    display: table;
+    height: 100%;
+    margin: 0;
+
+    > li {
+      display: table-cell;
+      height: 100%;
+      padding: 0 16px;
+      vertical-align: middle;
+      margin: 0;
+
+      &.link {
+        cursor: pointer;
+      }
+
+      &.active {
+        background-color: darkgreen;
+        color: white;
+      }
+    }
+  }
+}
+
+
+.btn-voltar{
+  color: white;
+  border-right: solid 1px white;
+  padding: 15px 10px 0;
+}

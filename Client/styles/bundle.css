@@ -1,0 +1,123 @@
+html, body {
+  margin: 0;
+  padding: 0; }
+
+div#pagehost {
+  padding: 16px; }
+
+p {
+  font-size: 14px; }
+
+.spacer {
+  height: 5px; }
+
+.spacer.med {
+  height: 10px; }
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 60px;
+  width: 100%;
+  z-index: 90000;
+  background-color: black;
+  font-family: 'Segoe UI', Verdana, Arial, sans-serif;
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap; }
+  header > ._navbar {
+    display: block;
+    height: 100%; }
+  header > ._navbar_grow {
+    flex-grow: 1; }
+
+div#pagehost {
+  margin-top: 60px; }
+
+._navbrand {
+  display: table;
+  height: 100%;
+  padding: 0 16px; }
+  ._navbrand > .valign {
+    display: table-cell;
+    height: 100%;
+    vertical-align: middle;
+    font-size: 26px; }
+
+._navlinks {
+  height: 100%; }
+  ._navlinks > ul {
+    display: table;
+    height: 100%;
+    margin: 0; }
+    ._navlinks > ul > li {
+      display: table-cell;
+      height: 100%;
+      padding: 0 16px;
+      vertical-align: middle;
+      margin: 0; }
+      ._navlinks > ul > li.link {
+        cursor: pointer; }
+      ._navlinks > ul > li.active {
+        background-color: darkgreen;
+        color: white; }
+
+.btn-voltar {
+  color: white;
+  border-right: solid 1px white;
+  padding: 15px 10px 0; }
+
+._navtoolbar {
+  height: 100%; }
+  ._navtoolbar > ul {
+    display: table;
+    height: 100%;
+    margin: 0; }
+    ._navtoolbar > ul > li {
+      display: table-cell;
+      height: 100%;
+      padding: 0 16px;
+      vertical-align: middle;
+      margin: 0;
+      cursor: pointer; }
+
+#dribbbleList .thumbnail, #dribbbleDetail .thumbnail {
+  margin-bottom: 30px;
+  padding: 0px;
+  position: relative; }
+  #dribbbleList .thumbnail .title, #dribbbleDetail .thumbnail .title {
+    position: absolute;
+    width: 100%;
+    bottom: 0px;
+    left: 0;
+    height: 40px;
+    padding: 10px;
+    background: black;
+    color: white; }
+  #dribbbleList .thumbnail img, #dribbbleDetail .thumbnail img {
+    width: 100%;
+    height: auto; }
+
+#dribbbleDetail .thumbnail {
+  margin-bottom: 0px; }
+#dribbbleDetail .header .avatar img {
+  width: 40px;
+  height: 40px;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
+  border-radius: 50%; }
+#dribbbleDetail .header .author {
+  margin-top: 10px;
+  margin-left: 10px;
+  font-size: 16px; }
+
+@media (max-width: 768px) {
+  ._navbrand > .valign {
+    font-size: 14px; } }
+
+/*# sourceMappingURL=bundle.css.map */
