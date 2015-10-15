@@ -6831,7 +6831,8 @@ header {
   flex-flow: row nowrap; }
   header > ._navbar {
     display: block;
-    height: 100%; }
+    height: 100%;
+    float: left; }
   header > ._navbar_grow {
     flex-grow: 1; }
 
@@ -6839,6 +6840,7 @@ div#pagehost {
   margin-top: 60px; }
 
 ._navbrand {
+  width: 80%;
   display: table;
   height: 100%;
   padding: 0 16px; }
@@ -6867,6 +6869,8 @@ div#pagehost {
         color: white; }
 
 .btn-voltar {
+  width: 7%;
+  min-width: 93px;
   color: white;
   border-right: solid 1px white;
   padding: 15px 10px 0; }
@@ -6918,6 +6922,9 @@ div#pagehost {
   font-size: 16px; }
 
 @media (max-width: 768px) {
+  ._navbrand > .valign {
+    font-size: 16px; } }
+@media (max-width: 640px) {
   ._navbrand > .valign {
     font-size: 14px; } }
 

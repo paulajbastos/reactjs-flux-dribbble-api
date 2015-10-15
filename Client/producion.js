@@ -41,6 +41,16 @@ var Actions = (function () {
             _dispatcher2['default'].dispatch('REQUEST-DRIBBBLE-SHOT-ID', { shotId: shotId });
         }
     }, {
+        key: 'processDribbbleShotId',
+        value: function processDribbbleShotId(shotId) {
+            _dispatcher2['default'].dispatch('PROCESS-DRIBBBLE-SHOT-ID', shotId);
+        }
+    }, {
+        key: 'requestDribbbleDataDetail',
+        value: function requestDribbbleDataDetail(data) {
+            _dispatcher2['default'].dispatch('REQUEST-DRIBBBLE-DATA-DETAIL', { data: data });
+        }
+    }, {
         key: 'processDribbbleDataDetail',
         value: function processDribbbleDataDetail(data) {
             _dispatcher2['default'].dispatch('PROCESS-DRIBBBLE-DATA-DETAIL', data);
@@ -666,6 +676,9 @@ var AppStore = (function (_Store) {
         this.logger.debug('Initializing AppStore');
 
         this.initialize('pages', [{ name: 'dribbblelist', title: 'Dribbble', nav: false, 'default': true }, { name: 'dribbbledetail', title: 'Dribbble Detail', nav: false, 'default': false }]);
+
+        console.log("window.location.hash.substr(1) = " + window.location.hash.substr(1));
+
         this.initialize('route', this.getNavigationRoute(window.location.hash.substr(1)));
         this.initialize('dribbbleData', []);
         this.initialize('dribbbleDataDetail', []);
@@ -680,7 +693,7 @@ var AppStore = (function (_Store) {
 
                 case 'NAVIGATE':
                     var newRoute = this.getNavigationRoute(data.location);
-                    //console.log("newRoute = "+ newRoute);
+                    console.log("newRoute = " + newRoute);
                     if (newRoute !== this.get('route')) {
                         this.set('route', newRoute);
                         window.location.hash = '#' + newRoute;
@@ -707,9 +720,16 @@ var AppStore = (function (_Store) {
                     });
                     break;
 
-                case 'REQUEST-DRIBBBLE-SHOT-ID':
+                case 'PROCESS-DRIBBBLE-DATA':
+                    this.set('dribbbleData', data.data);
+                    break;
+
+                case 'REQUEST-DRIBBBLE-DATA-DETAIL':
+                    //console.log("REQUEST-DRIBBBLE-DATA-DETAIL");
+                    //console.log(data.data);
+
                     _jquery2['default'].ajax({
-                        url: 'https://api.dribbble.com/v1/shots/' + data.shotId + '?access_token=7839443b2099142e9f0111e3726d4f93de80c529b6e7c91064d448825381bf74&callback=?',
+                        url: 'https://api.dribbble.com/v1/shots/' + data.data + '?access_token=7839443b2099142e9f0111e3726d4f93de80c529b6e7c91064d448825381bf74&callback=?',
                         //url: 'http://api.dribbble.com/v1//shots/',
                         //data: { tags: data.tag, tagmode: 'any', format: 'json' },
                         data: { format: 'json' },
@@ -720,13 +740,30 @@ var AppStore = (function (_Store) {
                     });
                     break;
 
-                case 'PROCESS-DRIBBBLE-DATA':
-                    this.set('dribbbleData', data.data);
-                    break;
-
                 case 'PROCESS-DRIBBBLE-DATA-DETAIL':
                     this.set('dribbbleDataDetail', data.data);
+                    //console.log(data.data.id);
+                    _actions2['default'].navigate("dribbbledetail#" + data.data.id);
                     break;
+
+                /*case 'REQUEST-DRIBBBLE-SHOT-ID':
+                    $.ajax({
+                        url: 'https://api.dribbble.com/v1/shots/'+data+'?access_token=7839443b2099142e9f0111e3726d4f93de80c529b6e7c91064d448825381bf74&callback=?',
+                        //url: 'http://api.dribbble.com/v1//shots/',
+                        //data: { tags: data.tag, tagmode: 'any', format: 'json' },
+                        data: { format: 'json' },
+                        dataType: 'json',
+                        jsonp: 'jsoncallback'
+                    }).done(response => {
+                        Actions.processDribbbleShotId(response);
+                    });
+                    break;*/
+
+                /*case 'PROCESS-DRIBBBLE-SHOT-ID':
+                    console.log(data);
+                    //this.set('shotId', data);
+                    //Actions.navigate("dribbbledetail");
+                    break; */
 
                 default:
                     this.logger.debug('Unknown actionType for this store - ignoring');
@@ -736,8 +773,12 @@ var AppStore = (function (_Store) {
     }, {
         key: 'getNavigationRoute',
         value: function getNavigationRoute(route) {
+            console.log("route = " + route);
+            var n = route.split('#');
+            console.log("route = " + n[0]);
+
             var newRoute = (0, _lodashCollectionFind2['default'])(this.get('pages'), function (path) {
-                return path.name === route.toLowerCase();
+                return path.name === n[0].toLowerCase();
             });
             if (!newRoute) {
                 newRoute = (0, _lodashCollectionFind2['default'])(this.get('pages'), function (path) {
@@ -942,11 +983,11 @@ var DribbbleDetail = (function (_React$Component) {
         _get(Object.getPrototypeOf(DribbbleDetail.prototype), 'constructor', this).call(this, props);
 
         this.state = {
-            dribbbleDataDetail: [],
-            shotId: ''
+            dribbbleDataDetail: []
+            //shotId: ''
         };
 
-        //Actions.requestDribbbleShot(this.state.shot);
+        //Actions.requestDribbbleShotId(this.state.shotId);
     }
 
     //
@@ -954,114 +995,140 @@ var DribbbleDetail = (function (_React$Component) {
     _createClass(DribbbleDetail, [{
         key: 'componentWillMount',
         value: function componentWillMount() {
+            var CurrentShot = this.state.dribbbleDataDetail;
+            console.log("componentWillMount = " + Object.keys(CurrentShot).length);
+            //console.log("componentWillMount = " + this.state.shotId);
+
+            //this.appStoreId = appStore.registerView(() => { this.updateState(); });
+            //this.updateState();
+        }
+    }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {
             var _this = this;
 
+            //console.log("carregou - componentDidMount");
             this.appStoreId = _storesAppStore2['default'].registerView(function () {
                 _this.updateState();
             });
             this.updateState();
+
+            //Actions.requestDribbbleShotId(this.state.shotId);
         }
     }, {
         key: 'componentWillUnmount',
         value: function componentWillUnmount() {
+            //let CurrentShot = this.state.dribbbleDataDetail;
+            //console.log("componentWillUnmount = " + Object.keys(CurrentShot).length);
+            //console.log("componentWillUnmount = " + this.state.shotId);
             _storesAppStore2['default'].deregisterView(this.appStoreId);
         }
     }, {
         key: 'updateState',
         value: function updateState() {
-            this.setState({
-                dribbbleDataDetail: _storesAppStore2['default'].get('dribbbleDataDetail')
-
-            });
+            this.setState({ dribbbleDataDetail: _storesAppStore2['default'].get('dribbbleDataDetail') });
+        }
+    }, {
+        key: 'componentWillUpdate',
+        value: function componentWillUpdate() {
+            //let CurrentShot = this.state.dribbbleDataDetail;
+            //console.log("will update = " + Object.keys(CurrentShot).length);
+            //console.log("will update = " + this.state.shotId);
         }
     }, {
         key: 'render',
         value: function render() {
-            var CurrentShot = this.state.dribbbleDataDetail;
-            //console.log(" aqui - "+ CurrentShot);
-            //console.log(CurrentShot);
-            //console.log(Object.keys(CurrentShot));
-            /* <div className="col-sm-6 col-md-3">
-                <img src={CurrentShot.images.normal}/>
-            </div>
-            */
 
-            //avatar_url
-            //description           
+            var CurrentShot = this.state.dribbbleDataDetail;
+            console.log("RENDER = " + Object.keys(CurrentShot).length);
+            //console.log("RENDER ID= " + CurrentShot.id);
+
+            var _title = "";
+            var _img = "";
+            var _viewsCount = "";
+            var _avatar = "";
+            var _author = "";
+            var _description = "aguarde";
 
             if (Object.keys(CurrentShot).length !== 0) {
 
-                return _react2['default'].createElement(
-                    'section',
-                    { id: 'dribbbleDetail' },
+                console.log("carregou - RENDER");
+
+                _title = CurrentShot.title;
+                _img = CurrentShot.images.normal;
+                _viewsCount = CurrentShot.views_count;
+                _avatar = CurrentShot.user.avatar_url;
+                _author = CurrentShot.user.name;
+                _description = CurrentShot.description;
+            } else {
+                console.log("nao carregou - RENDER");
+                //Actions.navigate("dribbblelist");
+            }
+
+            /*else{
+                _title = "";
+                _img = "";
+                _viewsCount = "";
+                _avatar = "";
+                _author =  "";   
+                _description = "aguarde";
+            }*/
+
+            return _react2['default'].createElement(
+                'section',
+                { id: 'dribbbleDetail' },
+                _react2['default'].createElement(
+                    'div',
+                    { className: 'row' },
                     _react2['default'].createElement(
                         'div',
-                        { className: 'row' },
+                        { className: 'col-lg-4' },
                         _react2['default'].createElement(
                             'div',
-                            { className: 'col-lg-4' },
+                            { className: 'thumbnail' },
+                            _react2['default'].createElement('img', { src: _img }),
                             _react2['default'].createElement(
                                 'div',
-                                { className: 'thumbnail' },
-                                _react2['default'].createElement('img', { src: CurrentShot.images.normal }),
+                                { className: 'title clearfix' },
                                 _react2['default'].createElement(
                                     'div',
-                                    { className: 'title clearfix' },
-                                    _react2['default'].createElement(
-                                        'div',
-                                        { className: 'pull-left' },
-                                        ' ',
-                                        CurrentShot.title
-                                    ),
-                                    _react2['default'].createElement(
-                                        'div',
-                                        { className: 'pull-right' },
-                                        _react2['default'].createElement('span', { className: 'glyphicon glyphicon-eye-open' }),
-                                        ' ',
-                                        CurrentShot.views_count
-                                    )
+                                    { className: 'pull-left' },
+                                    ' ',
+                                    _title
+                                ),
+                                _react2['default'].createElement(
+                                    'div',
+                                    { className: 'pull-right' },
+                                    _react2['default'].createElement('span', { className: 'glyphicon glyphicon-eye-open' }),
+                                    ' ',
+                                    _viewsCount
+                                )
+                            )
+                        ),
+                        _react2['default'].createElement('div', { className: 'spacer med' }),
+                        _react2['default'].createElement(
+                            'div',
+                            { className: 'descr' },
+                            _react2['default'].createElement(
+                                'div',
+                                { className: 'header clearfix' },
+                                _react2['default'].createElement(
+                                    'div',
+                                    { className: 'avatar pull-left' },
+                                    _react2['default'].createElement('img', { src: _avatar })
+                                ),
+                                _react2['default'].createElement(
+                                    'div',
+                                    { className: 'author pull-left' },
+                                    _author
                                 )
                             ),
                             _react2['default'].createElement('div', { className: 'spacer med' }),
-                            _react2['default'].createElement(
-                                'div',
-                                { className: 'descr' },
-                                _react2['default'].createElement(
-                                    'div',
-                                    { className: 'header clearfix' },
-                                    _react2['default'].createElement(
-                                        'div',
-                                        { className: 'avatar pull-left' },
-                                        _react2['default'].createElement('img', { src: CurrentShot.user.avatar_url })
-                                    ),
-                                    _react2['default'].createElement(
-                                        'div',
-                                        { className: 'author pull-left' },
-                                        CurrentShot.user.name
-                                    )
-                                ),
-                                _react2['default'].createElement('div', { className: 'spacer med' }),
-                                _react2['default'].createElement('div', { className: 'descr-text', dangerouslySetInnerHTML: { __html: CurrentShot.description } })
-                            )
+                            _react2['default'].createElement('div', { className: 'descr-text', dangerouslySetInnerHTML: { __html: _description } })
                         )
                     )
-                );
-            } else {
-
-                return _react2['default'].createElement(
-                    'section',
-                    { id: 'dribbbleDetail' },
-                    _react2['default'].createElement(
-                        'div',
-                        { className: 'row' },
-                        _react2['default'].createElement(
-                            'div',
-                            { className: 'col-sm-6 col-md-3' },
-                            'Aguarde...'
-                        )
-                    )
-                );
-            }
+                )
+            );
         }
     }]);
 
@@ -1138,11 +1205,20 @@ var DribbbleList = (function (_React$Component) {
                 dribbbleData: _storesAppStore2['default'].get('dribbbleData')
             });
         }
+
+        /*onClick(route,shotId) {
+            Actions.navigate(route);
+            Actions.requestDribbbleShotId(shotId);
+        }*/
+
+        // only shows data if obj.length > 0
+
     }, {
-        key: 'onClick',
-        value: function onClick(route, shotId) {
-            _actions2['default'].navigate(route);
-            _actions2['default'].requestDribbbleShotId(shotId);
+        key: 'changeShot',
+        value: function changeShot(shotId) {
+            console.log("changeShot = " + shotId);
+            _actions2['default'].requestDribbbleDataDetail(shotId);
+            //Actions.processDribbbleShotId(shotId);
         }
     }, {
         key: 'render',
@@ -1154,9 +1230,12 @@ var DribbbleList = (function (_React$Component) {
                 var s = shot.images.normal.split('/');
                 var fn = s[s.length - 1].split('.')[0];
 
+                //SETAR O ID E DEPOS ALTERAR A VIEW
                 var handler = function handler(event) {
-                    return _this2.onClick("dribbbledetail", shot.id);
+                    return _this2.changeShot(shot.id, event);
                 };
+                //let handler = event => { return this.onClick(this.changeShot(shot.id)); };
+                //let handler = event => { return this.onClick("dribbbledetail", shot.id); };
 
                 var divStyle = {
                     //color: 'white',
@@ -1271,17 +1350,12 @@ var NavBar = (function (_React$Component) {
 
             return _react2['default'].createElement(
                 'header',
-                null,
+                { className: 'clearfix' },
                 _react2['default'].createElement(_NavVoltarJsx2['default'], { pages: this.props.pages, route: this.props.route }),
                 _react2['default'].createElement(
                     'div',
-                    { className: '_navbar' },
+                    { className: '_navbrand' },
                     _react2['default'].createElement(_NavBrandJsx2['default'], null)
-                ),
-                _react2['default'].createElement(
-                    'div',
-                    { className: '_navbar _navbar_grow' },
-                    _react2['default'].createElement(_NavLinksJsx2['default'], { pages: this.props.pages, route: this.props.route })
                 )
             );
         }

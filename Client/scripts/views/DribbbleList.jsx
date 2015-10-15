@@ -29,9 +29,17 @@ class DribbbleList extends React.Component {
         });
     }
 
-    onClick(route,shotId) {
+    /*onClick(route,shotId) {
         Actions.navigate(route);
         Actions.requestDribbbleShotId(shotId);
+    }*/
+    
+    // only shows data if obj.length > 0 
+
+    changeShot(shotId){
+        console.log("changeShot = " + shotId);
+        Actions.requestDribbbleDataDetail(shotId);
+        //Actions.processDribbbleShotId(shotId);
     }
 
     render() {
@@ -40,7 +48,11 @@ class DribbbleList extends React.Component {
             let s = shot.images.normal.split('/');
             let fn = s[s.length - 1].split('.')[0];
 
-            let handler = event => { return this.onClick("dribbbledetail", shot.id); };
+            //SETAR O ID E DEPOS ALTERAR A VIEW
+            let handler = event => { return this.changeShot(shot.id, event)};
+            //let handler = event => { return this.onClick(this.changeShot(shot.id)); };
+            //let handler = event => { return this.onClick("dribbbledetail", shot.id); };
+
 
             var divStyle = {
                 //color: 'white',

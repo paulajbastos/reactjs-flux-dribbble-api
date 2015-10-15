@@ -17,6 +17,14 @@ export default class Actions {
         dispatcher.dispatch('REQUEST-DRIBBBLE-SHOT-ID', { shotId: shotId });
     }
 
+    static processDribbbleShotId(shotId) {
+        dispatcher.dispatch('PROCESS-DRIBBBLE-SHOT-ID', shotId);
+    }
+
+    static requestDribbbleDataDetail(data) {
+        dispatcher.dispatch('REQUEST-DRIBBBLE-DATA-DETAIL', { data: data });
+    }
+
     static processDribbbleDataDetail(data) {
         dispatcher.dispatch('PROCESS-DRIBBBLE-DATA-DETAIL', data);
     }

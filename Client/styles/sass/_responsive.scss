@@ -1,7 +1,13 @@
 ﻿@media (max-width : 768px) { 
 	
 	._navbrand > .valign{
+		font-size: 16px;
+	}
+}
+
+@media (max-width : 640px) { 
+	
+	._navbrand > .valign{
 		font-size: 14px;
 	}
-
 }

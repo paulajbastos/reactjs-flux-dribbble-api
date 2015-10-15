@@ -46,11 +46,6 @@ var Actions = (function () {
             _dispatcher2['default'].dispatch('PROCESS-DRIBBBLE-SHOT-ID', shotId);
         }
     }, {
-        key: 'requestDribbbleDataDetail',
-        value: function requestDribbbleDataDetail(data) {
-            _dispatcher2['default'].dispatch('REQUEST-DRIBBBLE-DATA-DETAIL', { data: data });
-        }
-    }, {
         key: 'processDribbbleDataDetail',
         value: function processDribbbleDataDetail(data) {
             _dispatcher2['default'].dispatch('PROCESS-DRIBBBLE-DATA-DETAIL', data);
@@ -676,13 +671,11 @@ var AppStore = (function (_Store) {
         this.logger.debug('Initializing AppStore');
 
         this.initialize('pages', [{ name: 'dribbblelist', title: 'Dribbble', nav: false, 'default': true }, { name: 'dribbbledetail', title: 'Dribbble Detail', nav: false, 'default': false }]);
-
-        console.log("window.location.hash.substr(1) = " + window.location.hash.substr(1));
-
         this.initialize('route', this.getNavigationRoute(window.location.hash.substr(1)));
         this.initialize('dribbbleData', []);
         this.initialize('dribbbleDataDetail', []);
         this.initialize('lastDribbbleRequest', 0);
+        this.initialize('shotId', 0);
     }
 
     _createClass(AppStore, [{
@@ -693,7 +686,7 @@ var AppStore = (function (_Store) {
 
                 case 'NAVIGATE':
                     var newRoute = this.getNavigationRoute(data.location);
-                    console.log("newRoute = " + newRoute);
+                    //console.log("newRoute = "+ newRoute);
                     if (newRoute !== this.get('route')) {
                         this.set('route', newRoute);
                         window.location.hash = '#' + newRoute;
@@ -720,16 +713,9 @@ var AppStore = (function (_Store) {
                     });
                     break;
 
-                case 'PROCESS-DRIBBBLE-DATA':
-                    this.set('dribbbleData', data.data);
-                    break;
-
-                case 'REQUEST-DRIBBBLE-DATA-DETAIL':
-                    //console.log("REQUEST-DRIBBBLE-DATA-DETAIL");
-                    //console.log(data.data);
-
+                case 'REQUEST-DRIBBBLE-SHOT-ID':
                     _jquery2['default'].ajax({
-                        url: 'https://api.dribbble.com/v1/shots/' + data.data + '?access_token=7839443b2099142e9f0111e3726d4f93de80c529b6e7c91064d448825381bf74&callback=?',
+                        url: 'https://api.dribbble.com/v1/shots/' + data.shotId + '?access_token=7839443b2099142e9f0111e3726d4f93de80c529b6e7c91064d448825381bf74&callback=?',
                         //url: 'http://api.dribbble.com/v1//shots/',
                         //data: { tags: data.tag, tagmode: 'any', format: 'json' },
                         data: { format: 'json' },
@@ -740,30 +726,18 @@ var AppStore = (function (_Store) {
                     });
                     break;
 
-                case 'PROCESS-DRIBBBLE-DATA-DETAIL':
-                    this.set('dribbbleDataDetail', data.data);
-                    //console.log(data.data.id);
-                    _actions2['default'].navigate("dribbbledetail#" + data.data.id);
+                case 'PROCESS-DRIBBBLE-DATA':
+                    this.set('dribbbleData', data.data);
                     break;
 
-                /*case 'REQUEST-DRIBBBLE-SHOT-ID':
-                    $.ajax({
-                        url: 'https://api.dribbble.com/v1/shots/'+data+'?access_token=7839443b2099142e9f0111e3726d4f93de80c529b6e7c91064d448825381bf74&callback=?',
-                        //url: 'http://api.dribbble.com/v1//shots/',
-                        //data: { tags: data.tag, tagmode: 'any', format: 'json' },
-                        data: { format: 'json' },
-                        dataType: 'json',
-                        jsonp: 'jsoncallback'
-                    }).done(response => {
-                        Actions.processDribbbleShotId(response);
-                    });
-                    break;*/
+                case 'PROCESS-DRIBBBLE-SHOT-ID':
+                    console.log("set shotId = " + data.shotId);
+                    this.set('shotId', data.shotId);
+                    break;
 
-                /*case 'PROCESS-DRIBBBLE-SHOT-ID':
-                    console.log(data);
-                    //this.set('shotId', data);
-                    //Actions.navigate("dribbbledetail");
-                    break; */
+                case 'PROCESS-DRIBBBLE-DATA-DETAIL':
+                    this.set('dribbbleDataDetail', data.data);
+                    break;
 
                 default:
                     this.logger.debug('Unknown actionType for this store - ignoring');
@@ -773,12 +747,8 @@ var AppStore = (function (_Store) {
     }, {
         key: 'getNavigationRoute',
         value: function getNavigationRoute(route) {
-            console.log("route = " + route);
-            var n = route.split('#');
-            console.log("route = " + n[0]);
-
             var newRoute = (0, _lodashCollectionFind2['default'])(this.get('pages'), function (path) {
-                return path.name === n[0].toLowerCase();
+                return path.name === route.toLowerCase();
             });
             if (!newRoute) {
                 newRoute = (0, _lodashCollectionFind2['default'])(this.get('pages'), function (path) {
@@ -983,8 +953,8 @@ var DribbbleDetail = (function (_React$Component) {
         _get(Object.getPrototypeOf(DribbbleDetail.prototype), 'constructor', this).call(this, props);
 
         this.state = {
-            dribbbleDataDetail: []
-            //shotId: ''
+            dribbbleDataDetail: [],
+            shotId: ''
         };
 
         //Actions.requestDribbbleShotId(this.state.shotId);
@@ -997,7 +967,7 @@ var DribbbleDetail = (function (_React$Component) {
         value: function componentWillMount() {
             var CurrentShot = this.state.dribbbleDataDetail;
             console.log("componentWillMount = " + Object.keys(CurrentShot).length);
-            //console.log("componentWillMount = " + this.state.shotId);
+            console.log("componentWillMount = " + this.state.shotId);
 
             //this.appStoreId = appStore.registerView(() => { this.updateState(); });
             //this.updateState();
@@ -1012,8 +982,6 @@ var DribbbleDetail = (function (_React$Component) {
                 _this.updateState();
             });
             this.updateState();
-
-            //Actions.requestDribbbleShotId(this.state.shotId);
         }
     }, {
         key: 'componentWillUnmount',
@@ -1026,7 +994,9 @@ var DribbbleDetail = (function (_React$Component) {
     }, {
         key: 'updateState',
         value: function updateState() {
-            this.setState({ dribbbleDataDetail: _storesAppStore2['default'].get('dribbbleDataDetail') });
+            this.setState({
+                dribbbleDataDetail: _storesAppStore2['default'].get('dribbbleDataDetail')
+            });
         }
     }, {
         key: 'componentWillUpdate',
@@ -1038,10 +1008,9 @@ var DribbbleDetail = (function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
-
             var CurrentShot = this.state.dribbbleDataDetail;
             console.log("RENDER = " + Object.keys(CurrentShot).length);
-            //console.log("RENDER ID= " + CurrentShot.id);
+            console.log("RENDER = " + this.state.shotId);
 
             var _title = "";
             var _img = "";
@@ -1061,19 +1030,13 @@ var DribbbleDetail = (function (_React$Component) {
                 _author = CurrentShot.user.name;
                 _description = CurrentShot.description;
             } else {
-                console.log("nao carregou - RENDER");
-                //Actions.navigate("dribbblelist");
-            }
-
-            /*else{
                 _title = "";
                 _img = "";
                 _viewsCount = "";
                 _avatar = "";
-                _author =  "";   
+                _author = "";
                 _description = "aguarde";
-            }*/
-
+            }
             return _react2['default'].createElement(
                 'section',
                 { id: 'dribbbleDetail' },
@@ -1129,6 +1092,55 @@ var DribbbleDetail = (function (_React$Component) {
                     )
                 )
             );
+
+            //console.log(" aqui - "+ CurrentShot);
+            //console.log(CurrentShot);
+            //console.log(Object.keys(CurrentShot));
+            /* <div className="col-sm-6 col-md-3">
+                <img src={CurrentShot.images.normal}/>
+            </div>
+            */
+
+            //avatar_url
+            //description           
+
+            /*if(Object.keys(CurrentShot).length !== 0){
+                 return (
+                    <section id="dribbbleDetail">
+                        <div className="row">
+                            <div className="col-lg-4">
+                                <div className="thumbnail">
+                                    <img src={CurrentShot.images.normal}/>
+                                    <div className="title clearfix">
+                                        <div className="pull-left"> {CurrentShot.title}</div>
+                                        <div className="pull-right"><span className="glyphicon glyphicon-eye-open"></span> {CurrentShot.views_count}</div>
+                                    </div>
+                                </div>
+                                <div className="spacer med"></div>
+                                <div className="descr">
+                                    <div className="header clearfix">
+                                        <div className="avatar pull-left"><img src={CurrentShot.user.avatar_url}/></div>
+                                        <div className="author pull-left">{CurrentShot.user.name}</div>
+                                    </div>
+                                    <div className="spacer med"></div>
+                                    <div className="descr-text" dangerouslySetInnerHTML={{__html: CurrentShot.description}}></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                );
+            }
+            else{
+                 return (
+                    <section id="dribbbleDetail">
+                        <div className="row">
+                            <div className="col-sm-6 col-md-3">
+                                Aguarde...
+                            </div>
+                        </div>
+                    </section>
+                );
+            }*/
         }
     }]);
 
@@ -1211,15 +1223,6 @@ var DribbbleList = (function (_React$Component) {
             Actions.requestDribbbleShotId(shotId);
         }*/
 
-        // only shows data if obj.length > 0
-
-    }, {
-        key: 'changeShot',
-        value: function changeShot(shotId) {
-            console.log("changeShot = " + shotId);
-            _actions2['default'].requestDribbbleDataDetail(shotId);
-            //Actions.processDribbbleShotId(shotId);
-        }
     }, {
         key: 'render',
         value: function render() {
@@ -1232,9 +1235,8 @@ var DribbbleList = (function (_React$Component) {
 
                 //SETAR O ID E DEPOS ALTERAR A VIEW
                 var handler = function handler(event) {
-                    return _this2.changeShot(shot.id, event);
+                    return _this2.onClick(_actions2['default'].processDribbbleShotId(_this2.state.shotId), event);
                 };
-                //let handler = event => { return this.onClick(this.changeShot(shot.id)); };
                 //let handler = event => { return this.onClick("dribbbledetail", shot.id); };
 
                 var divStyle = {
@@ -1354,8 +1356,13 @@ var NavBar = (function (_React$Component) {
                 _react2['default'].createElement(_NavVoltarJsx2['default'], { pages: this.props.pages, route: this.props.route }),
                 _react2['default'].createElement(
                     'div',
-                    { className: '_navbrand' },
+                    { className: '_navbar' },
                     _react2['default'].createElement(_NavBrandJsx2['default'], null)
+                ),
+                _react2['default'].createElement(
+                    'div',
+                    { className: '_navbar _navbar_grow' },
+                    _react2['default'].createElement(_NavLinksJsx2['default'], { pages: this.props.pages, route: this.props.route })
                 )
             );
         }

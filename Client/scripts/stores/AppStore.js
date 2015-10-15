@@ -14,6 +14,9 @@ class AppStore extends Store {
           { name: 'dribbblelist', title: 'Dribbble', nav: false, default: true },
           { name: 'dribbbledetail', title: 'Dribbble Detail', nav: false, default: false }
         ]);
+        
+        console.log("window.location.hash.substr(1) = " + window.location.hash.substr(1));
+
         this.initialize('route', this.getNavigationRoute(window.location.hash.substr(1)));
         this.initialize('dribbbleData', []);
         this.initialize('dribbbleDataDetail', []);
@@ -26,7 +29,7 @@ class AppStore extends Store {
 
             case 'NAVIGATE':
                 let newRoute = this.getNavigationRoute(data.location);
-                //console.log("newRoute = "+ newRoute);
+                console.log("newRoute = "+ newRoute);
                 if (newRoute !== this.get('route')) {
                     this.set('route', newRoute);
                     window.location.hash = `#${newRoute}`;
@@ -53,9 +56,17 @@ class AppStore extends Store {
                 });
                 break;
 
-            case 'REQUEST-DRIBBBLE-SHOT-ID':
+            case 'PROCESS-DRIBBBLE-DATA':
+                this.set('dribbbleData', data.data);
+                break;
+
+
+            case 'REQUEST-DRIBBBLE-DATA-DETAIL':
+                //console.log("REQUEST-DRIBBBLE-DATA-DETAIL");
+                //console.log(data.data);
+
                 $.ajax({
-                    url: 'https://api.dribbble.com/v1/shots/'+data.shotId+'?access_token=7839443b2099142e9f0111e3726d4f93de80c529b6e7c91064d448825381bf74&callback=?',
+                    url: 'https://api.dribbble.com/v1/shots/'+data.data+'?access_token=7839443b2099142e9f0111e3726d4f93de80c529b6e7c91064d448825381bf74&callback=?',
                     //url: 'http://api.dribbble.com/v1//shots/',
                     //data: { tags: data.tag, tagmode: 'any', format: 'json' },
                     data: { format: 'json' },
@@ -66,15 +77,33 @@ class AppStore extends Store {
                 });
                 break;
 
-            case 'PROCESS-DRIBBBLE-DATA':
-                this.set('dribbbleData', data.data);
-                break;
 
             case 'PROCESS-DRIBBBLE-DATA-DETAIL':
                 this.set('dribbbleDataDetail', data.data);
+                //console.log(data.data.id);
+                Actions.navigate("dribbbledetail#"+data.data.id);
                 break;
 
             
+            /*case 'REQUEST-DRIBBBLE-SHOT-ID':
+                $.ajax({
+                    url: 'https://api.dribbble.com/v1/shots/'+data+'?access_token=7839443b2099142e9f0111e3726d4f93de80c529b6e7c91064d448825381bf74&callback=?',
+                    //url: 'http://api.dribbble.com/v1//shots/',
+                    //data: { tags: data.tag, tagmode: 'any', format: 'json' },
+                    data: { format: 'json' },
+                    dataType: 'json',
+                    jsonp: 'jsoncallback'
+                }).done(response => {
+                    Actions.processDribbbleShotId(response);
+                });
+                break;*/
+
+            /*case 'PROCESS-DRIBBBLE-SHOT-ID':
+                console.log(data);
+                //this.set('shotId', data);
+                //Actions.navigate("dribbbledetail");
+                break; */
+           
             default:
                 this.logger.debug('Unknown actionType for this store - ignoring');
                 break;
@@ -82,7 +111,11 @@ class AppStore extends Store {
     }
 
     getNavigationRoute(route) {
-        let newRoute = find(this.get('pages'), path => { return path.name === route.toLowerCase(); });
+        console.log("route = " + route);
+        var n = route.split('#'); 
+        console.log("route = " + n[0]);
+
+        let newRoute = find(this.get('pages'), path => { return path.name === n[0].toLowerCase(); });
         if (!newRoute) {
             newRoute = find(this.get('pages'), path => { return path.default && path.default === true; });
         }

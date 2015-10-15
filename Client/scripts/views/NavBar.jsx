@@ -16,14 +16,11 @@ class NavBar extends React.Component {
         //<div onClick={handlerVoltar}>Voltar</div>
 
         return (
-            <header>
+            <header className="clearfix">
                 
                 <NavVoltar pages={this.props.pages} route={this.props.route}/>
-                <div className="_navbar">
+                <div className="_navbrand">
                     <NavBrand/>
-                </div>
-                <div className="_navbar _navbar_grow">
-                    <NavLinks pages={this.props.pages} route={this.props.route}/>
                 </div>
             </header>
         );
